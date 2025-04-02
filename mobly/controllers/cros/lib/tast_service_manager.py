@@ -56,7 +56,7 @@ Example Usage:
 
 import collections
 from collections.abc import Callable
-from typing import Any, Dict, List, ParamSpec, Type, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 from mobly import expects
 from mobly import logger as mobly_logger
@@ -66,7 +66,6 @@ from mobly.controllers.android_device_lib.services import base_service
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import tast_client
 from mobly.controllers.cros.lib import tast_service_wrapper
-from mobly.controllers.cros.lib.js_snippet_lib import snippet_management_service
 from mobly.controllers.cros.lib.tast_services import device_log_service
 from mobly.controllers.cros.lib.tast_services import floss_pandora_service
 from mobly.controllers.cros.lib.tast_services import tast_session_service
@@ -84,13 +83,11 @@ _FuncSignature = Callable[_P, _T]
 _SUPPORTED_SERVICE_CLASS = [
     tast_session_service.TastSessionService,
     device_log_service.DeviceLogService,
-    snippet_management_service.SnippetManagementService,
     floss_pandora_service.FlossPandoraService,
 ]
 
 # The service classes that can only be used when Tast Session Service is running
 _SERVICE_CLASSES_WITH_TAST_SESSION_SERVICE_DENPENDENCY = [
-    snippet_management_service.SnippetManagementService,
 ]
 
 # TODO:  Remove this try-except block once we have a
@@ -180,13 +177,13 @@ def _has_tast_session_service_dependency(
 def _assert_not_conflict_with_reserved_service_aliases(
     device: 'CrosDevice',
     alias: str,
-    service_class: Type[base_service.BaseService],
+    service_class: type[base_service.BaseService],
 ) -> None:
   """Asserts that reserved service aliases are not used by other services."""
   # Alias 'snippets' is reserved for SnippetManagementService and should not
   # be used by other services.
-  if (alias == constants.SNIPPET_MANAGEMENT_SERVICE_NAME and
-      service_class != snippet_management_service.SnippetManagementService):
+
+  if alias == constants.SNIPPET_MANAGEMENT_SERVICE_NAME:
     raise Error(
         device, f'Registering service class "{service_class}" with a reserved '
         f'alias "{alias}" is not allowed. Please use a different alias.')
@@ -215,7 +212,7 @@ class TastServiceManager(service_manager.ServiceManager):
     """
     self._device = device
     self._tast_client = None
-    self._service_objects: Dict[
+    self._service_objects: dict[
         str, base_service.BaseService] = collections.OrderedDict()
     self._keyboard_service_wrapper = None
     self._automation_service_wrapper = None
@@ -229,7 +226,7 @@ class TastServiceManager(service_manager.ServiceManager):
 
   def register(self,
                alias: str,
-               service_class: Type[base_service.BaseService],
+               service_class: type[base_service.BaseService],
                configs: Any = None,
                start_service: bool = True) -> None:
     """Registers a service.
@@ -288,7 +285,7 @@ class TastServiceManager(service_manager.ServiceManager):
     service_obj = self._service_objects.pop(alias)
     self._stop_one_service_obj(service_obj)
 
-  def start_services(self, service_aliases: List[str]) -> None:
+  def start_services(self, service_aliases: list[str]) -> None:
     """Starts the specified services.
 
     Services will be started in the order specified by the input list.
@@ -370,7 +367,7 @@ class TastServiceManager(service_manager.ServiceManager):
     for service in reversed(self._service_objects.values()):
       self._stop_one_service_obj(service)
 
-  def resume_services_from_suspension(self, service_aliases: List[str]) -> None:
+  def resume_services_from_suspension(self, service_aliases: list[str]) -> None:
     """Resumes services from suspension.
 
     Generally, this method is for resuming the services suspended by the method
@@ -485,14 +482,14 @@ class TastServiceManager(service_manager.ServiceManager):
       raise MissingTastSessionError(self._device, error_msg)
 
   def _assert_valid_service_class(
-      self, service_class: Type[base_service.BaseService]) -> None:
+      self, service_class: type[base_service.BaseService]) -> None:
     if service_class not in _SUPPORTED_SERVICE_CLASS:
       raise Error(
           self._device, f'Got invalid service class {service_class}. The '
           f'Supported classes are: {_SUPPORTED_SERVICE_CLASS}')
 
   def _assert_service_class_is_not_registered(
-      self, service_class: Type[base_service.BaseService]) -> None:
+      self, service_class: type[base_service.BaseService]) -> None:
     """Asserts that the given service class is not registered."""
     service_objects = filter(
         lambda service_obj: isinstance(service_obj, service_class),
@@ -576,5 +573,5 @@ class TastServiceManager(service_manager.ServiceManager):
   def resume_all(self) -> None:
     raise NotImplementedError()
 
-  def resume_services(self, service_aliases: List[str]) -> None:
+  def resume_services(self, service_aliases: list[str]) -> None:
     raise NotImplementedError()

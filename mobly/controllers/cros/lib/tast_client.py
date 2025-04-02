@@ -25,17 +25,17 @@ from mobly.snippet import errors
 
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import ssh as ssh_lib
-from tast-tests.cros.services.cros.audio import cras_control_service_pb2_grpc
-from tast-tests.cros.services.cros.bluetooth import bluetooth_ui_service_pb2_grpc
-from tast-tests.cros.services.cros.inputs import keyboard_service_pb2_grpc
-from tast-tests.cros.services.cros.inputs import touch_service_pb2_grpc
-from tast-tests.cros.services.cros.policy import policy_pb2_grpc
-from tast-tests.cros.services.cros.ui import automation_service_pb2_grpc
-from tast-tests.cros.services.cros.ui import chrome_service_pb2_grpc
-from tast-tests.cros.services.cros.ui import conn_service_pb2_grpc
-from tast-tests.cros.services.cros.ui import notification_service_pb2_grpc
-from tast-tests.cros.services.cros.ui import screen_recorder_service_pb2_grpc
-from tast-tests.cros.services.cros.wifi import shill_service_pb2_grpc
+from tast.cros.services.cros.audio import cras_control_service_pb2_grpc
+from tast.cros.services.cros.bluetooth import bluetooth_ui_service_pb2_grpc
+from tast.cros.services.cros.inputs import keyboard_service_pb2_grpc
+from tast.cros.services.cros.inputs import touch_service_pb2_grpc
+from tast.cros.services.cros.policy import policy_pb2_grpc
+from tast.cros.services.cros.ui import automation_service_pb2_grpc
+from tast.cros.services.cros.ui import chrome_service_pb2_grpc
+from tast.cros.services.cros.ui import conn_service_pb2_grpc
+from tast.cros.services.cros.ui import notification_service_pb2_grpc
+from tast.cros.services.cros.ui import screen_recorder_service_pb2_grpc
+from tast.cros.services.cros.wifi import shill_service_pb2_grpc
 
 # Avoid directly importing cros_device, which causes circular dependencies
 CrosDevice = Any

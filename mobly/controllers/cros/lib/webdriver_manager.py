@@ -28,6 +28,9 @@ import urllib.request
 from selenium import webdriver as selenium_webdriver
 from selenium.common import exceptions as selenium_exceptions
 
+import retry
+import functools
+
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import ssh as ssh_lib
 from mobly.controllers.cros.lib import unix_utils
@@ -46,6 +49,39 @@ class Error(Exception):
 
 class WebDriverSetupError(Exception):
   """Raised for errors if failed to setup webdriver."""
+
+class NotExpectedValueError(Exception):
+  """Raise for errors if function called and get unexpected return."""
+
+
+def verify_result(expected_result):
+  """A decorator that verifies the result of a function against an expected result.
+
+  Args:
+      expected_result: The expected result to compare against.
+  Excepts:
+      NotExpectedValueError: If the result of the function does not match the
+      expected result.
+  Returns:
+      A decorator that wraps the function.
+  """
+
+  def decorator(func):
+    @functools.wraps(func)  # Preserves original function's metadata
+    def wrapper(*args, **kwargs):
+      actual_result = func(*args, **kwargs)
+
+      if actual_result != expected_result:
+        error_message = (
+            f"Function '{func.__name__}' returned unexpected result: "
+            f'Expected: {expected_result}, Actual: {actual_result}'
+        )
+
+        raise NotExpectedValueError(error_message)
+      return actual_result
+
+    return wrapper  # Return the wrapped function
+  return decorator  # Return the decorator itself
 
 
 # TODO: Remove this class after we solved the flakiness issue.
@@ -130,6 +166,7 @@ class WebDriverManager:
     """The remote webdriver object for the CrOS device."""
     return self._webdriver
 
+  @retry.retry(exceptions=WebDriverSetupError, tries=3, delay=5)
   def setup(self) -> selenium_webdriver.Remote:
     """The entry point for setting up the remote webdriver.
 
@@ -204,6 +241,14 @@ class WebDriverManager:
         ])
     )
 
+    @retry.retry(
+        exceptions=NotExpectedValueError,
+        tries=3,
+        delay=1,
+        max_delay=3,
+        backoff=1.3,
+    )
+    @verify_result(True)
     def wait_remote_chromedriver_starts() -> bool:
       return self._is_chromedriver_server_running()
 
@@ -215,6 +260,14 @@ class WebDriverManager:
     if self._remote_chromedriver_server_process is None:
       return
 
+    @retry.retry(
+        exceptions=NotExpectedValueError,
+        tries=3,
+        delay=1,
+        max_delay=3,
+        backoff=1.3,
+    )
+    @verify_result(False)
     def wait_remote_chromedriver_stops() -> bool:
       self._send_request_to_chromedriver('/shutdown')
       return self._is_chromedriver_server_running()

@@ -24,10 +24,10 @@ from google.protobuf import descriptor
 from google.protobuf import message
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import tast_client
-from tast-tests.cros.services.cros.inputs import keyboard_service_pb2
-from tast-tests.cros.services.cros.inputs import keyboard_service_pb2_grpc
-from tast-tests.cros.services.cros.ui import automation_service_pb2
-from tast-tests.cros.services.cros.ui import automation_service_pb2_grpc
+from tast.cros.services.cros.inputs import keyboard_service_pb2
+from tast.cros.services.cros.inputs import keyboard_service_pb2_grpc
+from tast.cros.services.cros.ui import automation_service_pb2
+from tast.cros.services.cros.ui import automation_service_pb2_grpc
 
 
 class InvalidGrpcMethodCallError(Exception):

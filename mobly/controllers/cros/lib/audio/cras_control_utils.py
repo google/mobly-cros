@@ -24,9 +24,9 @@ from google.protobuf import empty_pb2
 from mobly.controllers.cros import cros_device
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import tast_client
-from tast-tests.cros.services.cros.audio import cras_control_service_pb2
-from tast-tests.cros.services.cros.audio import cras_control_service_pb2_grpc
-from tast-tests.cros.services.cros.audio import cras_types_pb2
+from tast.cros.services.cros.audio import cras_control_service_pb2
+from tast.cros.services.cros.audio import cras_control_service_pb2_grpc
+from tast.cros.services.cros.audio import cras_types_pb2
 
 
 _DEFAULT_TIMEOUT = constants.TAST_GRPC_CALL_DEFAULT_TIMEOUT_SEC

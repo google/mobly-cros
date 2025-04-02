@@ -24,7 +24,7 @@ from mobly.controllers.cros import cros_device
 from mobly.controllers.cros.lib.tast_services import device_log_service
 from mobly.controllers.cros.lib.tast_services import screen_recorder_service
 from mobly.controllers.cros.lib.tast_services import tast_session_service
-from tast-tests.cros.services.cros.ui import automation_service_pb2
+from tast.cros.services.cros.ui import automation_service_pb2
 
 
 class AdvancedFeaturesExampleTest(base_test.BaseTestClass):

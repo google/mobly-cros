@@ -26,8 +26,8 @@ from google.protobuf import empty_pb2
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import tast_client
 from mobly.controllers.cros.lib import tast_service_manager
-from tast-tests.cros.services.cros.bluetooth import bluetooth_ui_service_pb2
-from tast-tests.cros.services.cros.bluetooth import bluetooth_ui_service_pb2_grpc
+from tast.cros.services.cros.bluetooth import bluetooth_ui_service_pb2
+from tast.cros.services.cros.bluetooth import bluetooth_ui_service_pb2_grpc
 
 # Avoid directly importing cros_device, which causes circular dependencies
 CrosDevice = Any

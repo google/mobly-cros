@@ -14,10 +14,11 @@
 
 """The service to manage a Tast session on a CrOS device."""
 
+from collections.abc import Sequence
 import dataclasses
 import time
 import typing
-from typing import Any, Optional, Sequence, cast
+from typing import Any, Optional, cast
 
 import grpc
 from mobly import logger as mobly_logger
@@ -29,10 +30,10 @@ from google.protobuf import empty_pb2
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import ssh
 from mobly.controllers.cros.lib import tast_client
-from tast-tests.cros.services.cros.policy import policy_pb2
-from tast-tests.cros.services.cros.policy import policy_pb2_grpc
-from tast-tests.cros.services.cros.ui import chrome_service_pb2
-from tast-tests.cros.services.cros.ui import chrome_service_pb2_grpc
+from tast.cros.services.cros.policy import policy_pb2
+from tast.cros.services.cros.policy import policy_pb2_grpc
+from tast.cros.services.cros.ui import chrome_service_pb2
+from tast.cros.services.cros.ui import chrome_service_pb2_grpc
 
 # Avoid directly importing cros_device, which causes circular dependencies
 CrosDevice = Any
