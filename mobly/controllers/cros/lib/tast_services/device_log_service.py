@@ -14,11 +14,12 @@
 
 """The CrOS service for streaming multiple device logs to the host."""
 
+from collections.abc import Set
 import dataclasses
 import enum
 import pathlib
 import signal
-from typing import Optional, List, AbstractSet, Any
+from typing import Optional, Any
 
 from mobly import logger as mobly_logger
 from mobly import runtime_test_info
@@ -138,14 +139,14 @@ class Config:
       takes effect when the log `LogType#MEMORY_USAGE` is streamed.
   """
 
-  log_types: AbstractSet[LogType] = dataclasses.field(
+  log_types: Set[LogType] = dataclasses.field(
       default_factory=lambda: {LogType.CHROME_LOG, LogType.BLUETOOTH_MONITOR})
 
   memory_usage_top_n_process: int = 10
 
   def create_log_collectors(
       self, ssh: ssh_lib.SSHProxy,
-      log_host_dir: pathlib.Path) -> List[_RemoteCommandOutputCollector]:
+      log_host_dir: pathlib.Path) -> list[_RemoteCommandOutputCollector]:
     """Creates log collectors based on the configured log types.
 
     Args:
@@ -297,7 +298,7 @@ class DeviceLogService(base_service.BaseService):
     self._ssh.disconnect()
 
   def create_output_excerpts(
-      self, test_info: runtime_test_info.RuntimeTestInfo) -> List[Any]:
+      self, test_info: runtime_test_info.RuntimeTestInfo) -> list[Any]:
     """Creates excerpts for specified logs and returns the excerpt paths."""
     self._log.debug('Creating output excerpts.')
     dest_path = test_info.output_path

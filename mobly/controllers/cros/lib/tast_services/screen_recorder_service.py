@@ -18,7 +18,7 @@ import logging
 import os
 import time
 import typing
-from typing import Any, List
+from typing import Any
 
 from mobly import expects
 from mobly import logger as mobly_logger
@@ -32,8 +32,8 @@ from google.protobuf import empty_pb2
 from mobly.controllers.cros.lib import constants
 from mobly.controllers.cros.lib import tast_client
 from mobly.controllers.cros.lib.tast_services import test_fission_utils
-from tast-tests.cros.services.cros.ui import screen_recorder_service_pb2
-from tast-tests.cros.services.cros.ui import screen_recorder_service_pb2_grpc
+from tast.cros.services.cros.ui import screen_recorder_service_pb2
+from tast.cros.services.cros.ui import screen_recorder_service_pb2_grpc
 
 # Avoid directly importing cros_device, which causes circular dependencies
 CrosDevice = Any
@@ -103,7 +103,7 @@ class ScreenRecorderService(base_service.BaseService):
     )
     self._is_alive: bool = False
     self._final_filename = ''
-    self._generated_video_host_paths: List[str] = []
+    self._generated_video_host_paths: list[str] = []
 
   @property
   def debug_tag(self) -> str:
@@ -249,7 +249,7 @@ class ScreenRecorderService(base_service.BaseService):
 
   def create_output_excerpts(
       self, test_info: runtime_test_info.RuntimeTestInfo
-  ) -> List[Any]:
+  ) -> list[Any]:
     """Creates screen recording excerpts and returns the excerpt host paths.
 
     This moves the generated screen recording videos to the given excerpt
@@ -286,11 +286,11 @@ class ScreenRecorderService(base_service.BaseService):
 
   def _create_output_excerpts(
       self, test_info: runtime_test_info.RuntimeTestInfo
-  ) -> List[Any]:
+  ) -> list[Any]:
     dest_dir_path = test_info.output_path
     utils.create_dir(dest_dir_path)
 
-    excerpt_file_paths: List[str] = []
+    excerpt_file_paths: list[str] = []
     generated_video_host_paths = self._generated_video_host_paths
     self._generated_video_host_paths = []
 
