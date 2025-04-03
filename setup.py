@@ -27,6 +27,9 @@ install_requires = [
     'pyzmq>=15.0.0',
     'selenium==4.0.0',
     'retry',
+    'dacite',
+    'grpcio',
+    'protobuf'
 ]
 
 setuptools.setup(
