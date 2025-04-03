@@ -18,13 +18,14 @@ References:
 https://chromium.googlesource.com/chromiumos/third_party/autotest/+/refs/heads/main/client/bin/utils.py
 """
 
-from typing import Callable, Optional, Tuple
+from collections.abc import Callable
+from typing import Optional
 
 ShellType = Callable[[str], str]
 
 
 def get_oldest_by_name(shell: ShellType,
-                       name: str) -> Tuple[Optional[int], Optional[str]]:
+                       name: str) -> tuple[Optional[int], Optional[str]]:
   """Returns pid and command line of oldest process whose name matches |name|.
 
   Args:

@@ -25,13 +25,13 @@ install_requires = [
     'mobly>=1.12.2',
     'paramiko>=2.10.4',
     'pyzmq>=15.0.0',
-    'selenium'
-    'retry'
+    'selenium==4.0.0',
+    'retry',
 ]
 
 setuptools.setup(
     name='mobly-cros',
-    version='1.2.0',
+    version='1.0.0',
     author='Minghao Li',
     author_email='minghaoli@google.com',
     description=description,

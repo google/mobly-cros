@@ -16,14 +16,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Generator, Iterable, Sequence
 import contextlib
 import dataclasses
 import logging
 import os
 import pathlib
 import time
-from typing import Any, Dict, Generator, Iterable, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 from mobly import logger as mobly_logger
 from mobly import signals
@@ -44,6 +44,10 @@ if TYPE_CHECKING:
   from selenium import webdriver as selenium_webdriver
   # pylint: enable=g-bad-import-order, g-import-not-at-top
   # pytype: enable=import-error
+
+_SSH_KEY_IDENTITY = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'data/testing_rsa'
+)
 
 # This is used in the config file located in the test lab's home directory.
 MOBLY_CONTROLLER_CONFIG_NAME = 'CrosDevice'
@@ -77,7 +81,7 @@ class ServiceError(DeviceError):
   """
 
 
-def create(configs: Iterable[Dict[str, Any]]) -> Iterable[CrosDevice]:
+def create(configs: Iterable[dict[str, Any]]) -> Iterable[CrosDevice]:
   """Creates CrosDevice objects.
 
   Mobly uses this to instantiate CrosDevice controller objects from configs. The
@@ -105,6 +109,11 @@ def create(configs: Iterable[Dict[str, Any]]) -> Iterable[CrosDevice]:
     raise Error(_CROS_DEVICE_EMPTY_CONFIG_MSG)
   elif not isinstance(configs, list):
     raise Error(f'{_CROS_DEVICE_CONFIGS_NOT_LIST_MSG}: {configs}')
+
+  try:
+    os.chmod(_SSH_KEY_IDENTITY, 0o600)
+  except OSError as e:
+    logging.warning('Failed to chmod %s: %s', _SSH_KEY_IDENTITY, e)
 
   crosds = []
   for config in configs:
@@ -160,7 +169,7 @@ def destroy(crosds: Iterable[CrosDevice]) -> None:
       logging.exception('Failed to clean up properly.')
 
 
-def get_info(devices: Sequence[CrosDevice]) -> Sequence[Dict[str, Any]]:
+def get_info(devices: Sequence[CrosDevice]) -> Sequence[dict[str, Any]]:
   """Gets info from the CrosDevice objects used in a test run.
 
   Args:
@@ -281,17 +290,22 @@ class CrosDevice:
       socket.error: if a socket error occurred while connecting.
     """
     if self._ssh is None:
-      ssh_connection = ssh_lib.SSHProxy(
-          hostname=self.hostname,
-          ssh_port=self.ssh_port,
-          username=self._ssh_username,
-          password=self._ssh_password,
-      )
+      ssh_connection = self._create_ssh_connection()
       ssh_connection.connect(
           self.SSH_CONNECT_TIMEOUT_SECONDS, self.SSH_BANNER_TIMEOUT_SECONDS
       )
       self._ssh = ssh_connection
     return self._ssh
+
+  def _create_ssh_connection(self) -> ssh_lib.SSHProxy:
+    """Creates a new ssh connection to the ChromeOS device."""
+    return ssh_lib.SSHProxy(
+        hostname=self.hostname,
+        ssh_port=self.ssh_port,
+        username=self._ssh_username,
+        password=self._ssh_password,
+        keyfile=_SSH_KEY_IDENTITY if self._ssh_password is None else None,
+    )
 
   @property
   def webdriver(
@@ -333,7 +347,7 @@ class CrosDevice:
     return self._build_info
 
   @property
-  def device_info(self) -> Dict[str, Any]:
+  def device_info(self) -> dict[str, Any]:
     """Information to be pulled into controller info in the test summary file.
 
     The serial, model and build_info are included.
