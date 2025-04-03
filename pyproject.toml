@@ -1,0 +1,19 @@
+[project]
+name = "mobly-cros"
+description = "Mobly CrOS controller module for using Python code to operate CrOS devices in Mobly tests."
+authors = [{ name = "Google Inc." }]
+maintainers = [{ name = "Minghao Li", email = "minghaoli@google.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.11"
+version = "1.0.0"
+dependencies = [
+    'mobly>=1.12.2',
+    'paramiko>=2.10.4',
+    'pyzmq>=15.0.0',
+    'selenium==4.0.0',
+    'retry'
+]
+
+[tool.setuptools]
+include-package-data = true
