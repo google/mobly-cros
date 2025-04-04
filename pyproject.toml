@@ -12,7 +12,10 @@ dependencies = [
     'paramiko>=2.10.4',
     'pyzmq>=15.0.0',
     'selenium==4.0.0',
-    'retry'
+    'retry',
+    'dacite',
+    'grpcio',
+    'protobuf'
 ]
 
 [tool.setuptools]
