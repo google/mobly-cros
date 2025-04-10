@@ -1,46 +1,66 @@
-#take $1 $2
-# $1 is a destination pass for tast folder, should be mobly-cros repo
-# $2 is a hash to use to download tast-tests repo and generate from it
+#!/bin/bash
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-REPO_URL="https://chromium.googlesource.com/chromiumos/platform/tast-tests"
-DEST_DIR="/tmp/tast"
-BASE_DIR=$DEST_DIR
-DIR_TO_ITERATE="$BASE_DIR/cros/services/cros"
-GENERATED_FOLDER_PATH=$1
 
-mkdir -p $DEST_DIR
-# DOWNLOAD A GIT REPO
-# Check if the destination folder already exists
-if [ -d "$DEST_DIR" ]; then
-    echo "Directory $DEST_DIR already exists. Ignoring it"
-    # rm -r $DEST_DIR
-else
-    echo "Cloning the repository into $DEST_DIR..."
-    git clone "$REPO_URL" "$DEST_DIR"
+PACKAGE_NAME="tast"
+DEST_DIR="/tmp/$PACKAGE_NAME"
+GENERATED_FOLDER_PATH="/tmp/generated_services"
+COMMIT_SHA=$(cat "TAST_COMMIT")
+
+mkdir -p $GENERATED_FOLDER_PATH
+
+# Download a Git repo
+./download_tast_services_repo.sh "$DEST_DIR" "$COMMIT_SHA"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to download repo. Check the output to find a problem"
+    exit 1
 fi
 
 # Folders with Services used in mobly-cros
-sub_folders=(
-"ui"
-"bluetooth"
-"wifi"
-"audio"
-"policy"
-"inputs"
+USED_SERVICES=(
+"cros/services/cros/ui"
+"cros/services/cros/bluetooth"
+"cros/services/cros/wifi"
+"cros/services/cros/audio"
+"cros/services/cros/policy"
+"cros/services/cros/inputs"
 )
 
-for sub_folder in "${sub_folders[@]}"; do
-    dir=$DIR_TO_ITERATE/$sub_folder
-    if [ -n "$(find $dir -maxdepth 1 -name *.proto)" ]; then
-        echo "Processing .proto files in directory: $dir"
-
-        folder_name=$(basename "$dir")
+for service in "${USED_SERVICES[@]}"; do
+    current_dir="$DEST_DIR/$service"
+    if [ -n "$(find $current_dir -maxdepth 1 -name *.proto)" ]; then
+        echo "Processing .proto files in directory: $current_dir"
         out_path=$GENERATED_FOLDER_PATH
-        
+
+        # Replace a go-like import to python style keeping a current package structure
+        find $current_dir -name "*.proto" -print0 | xargs -0 -I {} sed -i 's#import "go.chromium.org/tast-tests#import "tast#g' {}
         # Run the grpc_tools.protoc command
-        python -m grpc_tools.protoc -I=/tmp --plugin=protoc-gen-mypy=/usr/local/google/home/astrouski/temp_scripts/venv/bin/protoc-gen-mypy --python_out=$out_path --mypy_out=$out_path --grpc_python_out=$out_path $dir/*.proto
-        touch "$dir/__init__.py" 
+        python -m grpc_tools.protoc -I=/tmp --plugin=protoc-gen-mypy \
+            --python_out=$out_path --mypy_out=$out_path --grpc_python_out=$out_path $current_dir/*.proto
+        touch "$out_path/$PACKAGE_NAME/$service/__init__.py" 
     else
-        echo "No .proto files found in directory: $dir"
+        echo "No .proto files found in directory: $current_dir"
     fi
 done
+
+
+MOBLY_CROS_PATH=$(dirname "$(dirname "$(realpath "$0")")")
+
+# sync generated folder with one in mobly-cros repo
+rsync -a --delete "$GENERATED_FOLDER_PATH/$PACKAGE_NAME/" "$MOBLY_CROS_PATH/$PACKAGE_NAME/"
+
+# Remove generated folder
+rm -rf $GENERATED_FOLDER_PATH

@@ -285,3 +285,9 @@ Here is an example:
         '.querySelector("os-settings-menu").shadowRoot'
         '.querySelector("#aboutItem")').click()
 ```
+
+## Tast services
+
+[`Tast`](https://github.com/google/mobly-cros/tree/main/tast) folder contain all generated files with services required for CrOS controller. 
+
+To update or regenerate services follow [`scripts/README`](https://github.com/google/mobly-cros/tree/main/scripts/README)
